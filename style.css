@@ -193,6 +193,22 @@ button:disabled { opacity: .55; cursor: not-allowed; }
   font-weight: 800;
 }
 
+.day.past {
+  color: #c0c2c8;
+  background: #292b30;
+  border-color: #41434b;
+}
+
+.day.past small { color: #a7aab1; }
+.day.past .day-badge { background: #35373d; color: #b8bac1; }
+.day.past .day-done { background: #b9bdc4; color: #26282d; }
+
+.day.past.selected {
+  color: var(--fg);
+  background: #43464e;
+  border-color: #a0a4ae;
+}
+
 .week-legend {
   display: flex;
   justify-content: center;

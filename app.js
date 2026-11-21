@@ -88,15 +88,16 @@ function dayBadge(type) {
   return `<span class="day-badge ${type}">${icon(dayTypes[type].icon)}</span>`;
 }
 
-function dayButton(date, selected, i) {
+function dayButton(date, selected, i, todayDate) {
   const items = allActivities(date);
   const type = items.find(activity => activity.id !== 'walk')?.id || 'rest';
   const completed = items.every(activity => done(date, activity.id));
-  const isToday = date === today();
+  const isToday = date === todayDate;
+  const isPast = date < todayDate;
   const dateLabel = niceDate(date, {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'});
-  return `<button class="day ${isToday ? 'today' : ''} ${date === selected ? 'selected' : ''}" data-day="${date}"
+  return `<button class="day ${isToday ? 'today' : ''} ${isPast ? 'past' : ''} ${date === selected ? 'selected' : ''}" data-day="${date}"
     aria-pressed="${date === selected}" ${isToday ? 'aria-current="date"' : ''}
-    aria-label="${dateLabel}, ${dayTypes[type].label}${completed ? ', всё выполнено' : ''}">
+    aria-label="${dateLabel}, ${dayTypes[type].label}${isPast ? ', день прошёл' : ''}${completed ? ', всё выполнено' : ''}">
     <small>${weekdays[i]}</small><strong>${parseDate(date).getDate()}</strong>${dayBadge(type)}
     ${completed ? '<span class="day-done" aria-hidden="true">✓</span>' : ''}
   </button>`;
@@ -147,12 +148,12 @@ function home(direction = 0) {
         <div class="week-range" id="weekRange">${niceDate(weekDays[0])} — ${niceDate(weekDays[6])}</div>
         <button class="btn icon-button" id="nextWeek" aria-label="Следующая неделя">${icon('m9 5 7 7-7 7')}</button>
       </div>
-      <div class="week-window"><div class="weekrow">${weekDays.map((date, i) => dayButton(date, selected, i)).join('')}</div></div>
+      <div class="week-window"><div class="weekrow">${weekDays.map((date, i) => dayButton(date, selected, i, t)).join('')}</div></div>
       <div class="week-legend">${Object.entries(dayTypes).map(([type, {label}]) => `<span>${dayBadge(type)}${label}</span>`).join('')}</div>
     </div>
   </section>
   <section aria-labelledby="dayHeading">
-    <div class="sectionhead day-heading"><div><h2 id="dayHeading">${selected === t ? 'Сегодня' : niceDate(selected, {weekday: 'long'})}</h2><span class="selected-date">${niceDate(selected, {day: 'numeric', month: 'long'})}</span></div><span class="tag">${completed} из ${items.length} выполнено</span></div>
+    <div class="sectionhead day-heading"><div><h2 id="dayHeading">${selected === t ? 'Сегодня' : niceDate(selected, {weekday: 'long'})}</h2><span class="selected-date">${niceDate(selected, {day: 'numeric', month: 'long'})}${selected < t ? ' · День прошёл' : ''}</span></div><span class="tag">${completed} из ${items.length} выполнено</span></div>
     <div class="panel activity-panel">${items.map(a => `<label class="activity"><span class="activity-icon" aria-hidden="true">${a.id === 'walk' ? icon('M14 4a2 2 0 1 0 0 .01ZM7 21l3-5m3-7 2 4 4 1m-5 7-2-5-3-2 2-5-4 2-2 3') : icon(dayTypes[a.id].icon)}</span><span class="details"><strong>${a.label}</strong><small>${esc(state.times[a.id])} · ${a.id === 'strength' ? '25–35' : '30–40'} мин</small></span><input class="check" type="checkbox" data-check="${a.id}" ${done(selected, a.id) ? 'checked' : ''} aria-label="Отметить: ${a.label}"></label>`).join('')}
     <div class="progress" role="progressbar" aria-label="Прогресс дня" aria-valuenow="${pct}"><div style="width:${pct}%"></div></div></div>
     ${w >= 0 && w < 12 ? `<div class="panel accent"><h3>${strength ? 'План силовой' : cardio ? 'План кардио' : 'Восстановление'}</h3>
